@@ -42,7 +42,7 @@ const proxy = cors_proxy.createServer({
 http.createServer((req, res) => {
   if (req.url === '/' || req.url === '/help' || req.url === '/favicon.ico') {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('✅ Server is running. Only allowed from https://cricketstan.github.io');
+    res.end('✅ Server is running. Kiya Re Madarchod');
   } else {
     proxy.emit('request', req, res);
   }
