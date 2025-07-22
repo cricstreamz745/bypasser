@@ -1,12 +1,13 @@
-const cors_proxy = require('allrounder');
+const http = require('http');
+const cors_proxy = require('cors-anywhere');
 
 const host = process.env.HOST || '0.0.0.0';
 const port = process.env.PORT || 8080;
 
 const allowedOrigin = 'https://cricketstan.github.io';
 
-cors_proxy.createServer({
-  originWhitelist: [allowedOrigin], // Only allow your domain
+const proxy = cors_proxy.createServer({
+  originWhitelist: [allowedOrigin],
   requireHeader: ['origin', 'x-requested-with'],
   removeHeaders: [
     'cookie',
@@ -27,7 +28,6 @@ cors_proxy.createServer({
       return callback(new Error('Invalid URL: ' + url));
     }
 
-    // Double-check origin and referer
     if (
       origin !== allowedOrigin &&
       (!this.headers || !this.headers.referer || !this.headers.referer.startsWith(allowedOrigin))
@@ -37,6 +37,15 @@ cors_proxy.createServer({
 
     callback(null, url);
   }
-}).listen(port, host, function () {
-  console.log(`CORS Proxy running at ${host}:${port} for ${allowedOrigin}`);
+});
+
+http.createServer((req, res) => {
+  if (req.url === '/' || req.url === '/help' || req.url === '/favicon.ico') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('✅ Server is running. Only allowed from https://cricketstan.github.io');
+  } else {
+    proxy.emit('request', req, res);
+  }
+}).listen(port, host, () => {
+  console.log(`✅ CORS Proxy running at http://${host}:${port} for ${allowedOrigin}`);
 });
